@@ -1,0 +1,4 @@
+/* Additional custom styles for the App component */
+.container {
+  max-width: 1200px;
+}
