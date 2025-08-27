@@ -9,6 +9,8 @@ interface FileManagerProps {
   onAddFileToTopic: (fileId: string, topicName: string) => void;
   onTopicDelete: (topicId: string) => void;
   frameless?: boolean;
+  onFileSelect?: (fileId: string | null) => void;
+  selectedFileId?: string | null;
 }
 
 interface DragData {
@@ -16,7 +18,7 @@ interface DragData {
   fileName: string;
 }
 
-export function FileManager({ files, topics, onFileDelete, onAddFileToTopic, onTopicDelete, frameless }: FileManagerProps) {
+export function FileManager({ files, topics, onFileDelete, onAddFileToTopic, onTopicDelete, frameless, onFileSelect, selectedFileId }: FileManagerProps) {
   const [draggedFile, setDraggedFile] = useState<DragData | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'file' | 'topic'; id: string } | null>(null);
 
@@ -106,9 +108,10 @@ export function FileManager({ files, topics, onFileDelete, onAddFileToTopic, onT
                 draggable
                 onDragStart={(e) => handleDragStart(e, file)}
                 onDragEnd={handleDragEnd}
+                onClick={() => onFileSelect && onFileSelect(file.id)}
                 className={`flex items-center justify-between p-3 glass-input rounded-lg cursor-move transition-all hover:bg-white/20 ${
                   draggedFile?.fileId === file.id ? 'opacity-50' : ''
-                }`}
+                } ${selectedFileId === file.id ? 'ring-2 ring-white/60' : ''}`}
               >
                 <div className="flex items-center min-w-0 flex-1">
                   <FileText className="mr-3 text-white/60 flex-shrink-0" size={16} />
@@ -176,9 +179,10 @@ export function FileManager({ files, topics, onFileDelete, onAddFileToTopic, onT
                       draggable
                       onDragStart={(e) => handleDragStart(e, file)}
                       onDragEnd={handleDragEnd}
+                      onClick={() => onFileSelect && onFileSelect(file.id)}
                       className={`flex items-center justify-between p-3 glass-input rounded-lg cursor-move transition-all hover:bg-white/20 ${
                         draggedFile?.fileId === file.id ? 'opacity-50' : ''
-                      }`}
+                      } ${selectedFileId === file.id ? 'ring-2 ring-white/60' : ''}`}
                     >
                       <div className="flex items-center min-w-0 flex-1">
                         <FileText className="mr-3 text-white/60 flex-shrink-0" size={16} />

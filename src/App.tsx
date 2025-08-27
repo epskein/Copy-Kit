@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileUpload } from './components/FileUpload';
 import { PatternDisplay } from './components/PatternDisplay';
 import { TopicManager } from './components/TopicManager';
@@ -12,6 +12,7 @@ function App() {
   const [files, setFiles] = useState<FileData[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
   const [analysisResults, setAnalysisResults] = useState<ExtractedPattern | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -56,6 +57,8 @@ function App() {
 
   const handleTopicSelected = (topic: Topic | null) => {
     setSelectedTopic(topic);
+    // Clear file selection when a topic is selected
+    if (topic) setSelectedFileId(null);
   };
 
   const handleFileDelete = (fileId: string) => {
@@ -111,6 +114,41 @@ function App() {
     }
   };
 
+  // Compute analysis results based on selection
+  useEffect(() => {
+    const computeForFiles = (targetFiles: FileData[]) => {
+      if (targetFiles.length === 0) {
+        setAnalysisResults(null);
+        return;
+      }
+      const results = targetFiles.map(file =>
+        PatternAnalyzer.analyzeFile(file.content, file.name)
+      );
+      const mergedResults = PatternAnalyzer.mergeAnalysisResults(results);
+      const patternResults: ExtractedPattern = {
+        prompts: mergedResults.prompts,
+        phrases: mergedResults.phrases,
+        conversation: mergedResults.conversation
+      };
+      setAnalysisResults(patternResults);
+    };
+
+    if (selectedFileId) {
+      const file = files.find(f => f.id === selectedFileId);
+      computeForFiles(file ? [file] : []);
+      return;
+    }
+
+    if (selectedTopic) {
+      const topicFiles = files.filter(f => (f.topics || []).includes(selectedTopic.name));
+      computeForFiles(topicFiles);
+      return;
+    }
+
+    // Default to all files
+    computeForFiles(files);
+  }, [selectedFileId, selectedTopic, files]);
+
   return (
     <div className="min-h-screen relative">
       {/* Background Image Cycler */}
@@ -164,6 +202,8 @@ function App() {
                 onFileDelete={handleFileDelete}
                 onAddFileToTopic={handleAddFileToTopic}
                 onTopicDelete={handleTopicDelete}
+                onFileSelect={(fileId) => setSelectedFileId(fileId)}
+                selectedFileId={selectedFileId}
                 frameless
               />
             </div>

@@ -66,14 +66,7 @@ export function PatternDisplay({ results, isAnalyzing, selectedTopic }: PatternD
       {/* Header */}
       <div className="border-b border-white/20 p-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-semibold text-glass">
-            Pattern Analysis Results
-            {selectedTopic && (
-              <span className="ml-3 text-sm bg-white/20 text-white px-4 py-2 rounded-full">
-                {selectedTopic.name}
-              </span>
-            )}
-          </h2>
+          <h2 className="text-3xl font-semibold text-glass">Pattern Analysis Results</h2>
           <div className="flex items-center space-x-6">
             <div className="text-glass-muted">
               {results.prompts.length} prompts • {results.phrases.length} phrases • {results.conversation?.length || 0} conversation
