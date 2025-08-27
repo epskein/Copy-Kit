@@ -1,19 +1,63 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useBackgroundCycler } from '../hooks/useBackgroundCycler';
 
 export const BackgroundCycler: React.FC = () => {
-  const { currentImage, currentImageIndex } = useBackgroundCycler();
+  const { currentImage } = useBackgroundCycler();
+
+  // Cross-fade state
+  const [baseImage, setBaseImage] = useState<string>(currentImage);
+  const [overlayImage, setOverlayImage] = useState<string | null>(null);
+  const [overlayVisible, setOverlayVisible] = useState(false);
+  const fadeDurationMs = 6000; // slower, more gradual fade
+
+  const lastImageRef = useRef<string>(currentImage);
+
+  useEffect(() => {
+    if (currentImage === lastImageRef.current) return;
+
+    // Prepare overlay with the next image
+    setOverlayImage(currentImage);
+    setOverlayVisible(false);
+
+    const raf = requestAnimationFrame(() => {
+      setOverlayVisible(true);
+    });
+
+    const timeout = setTimeout(() => {
+      setBaseImage(currentImage);
+      setOverlayImage(null);
+      setOverlayVisible(false);
+      lastImageRef.current = currentImage;
+    }, fadeDurationMs);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timeout);
+    };
+  }, [currentImage]);
 
   return (
     <>
+      {/* Base layer */}
       <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat transition-all duration-[2000ms] ease-in-out z-[-2]"
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat z-[-2]"
         style={{
-          backgroundImage: `url('${currentImage}'), linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%)`,
+          backgroundImage: `url('${baseImage}'), linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%)`,
         }}
-        key={currentImageIndex}
       />
-      
+
+      {/* Overlay layer for cross-fade */}
+      {overlayImage && (
+        <div
+          className={`fixed inset-0 bg-cover bg-center bg-no-repeat z-[-2] transition-opacity duration-[6000ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            overlayVisible ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{
+            backgroundImage: `url('${overlayImage}'), linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%)`,
+          }}
+        />
+      )}
+
       {/* Overlay for consistent glass effect */}
       <div className="fixed inset-0 z-[-1] pointer-events-none">
         <div 

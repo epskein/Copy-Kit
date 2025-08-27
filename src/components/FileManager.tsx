@@ -8,6 +8,7 @@ interface FileManagerProps {
   onFileDelete: (fileId: string) => void;
   onFileMove: (fileId: string, newTopic: string | undefined) => void;
   onTopicDelete: (topicId: string) => void;
+  frameless?: boolean;
 }
 
 interface DragData {
@@ -15,7 +16,7 @@ interface DragData {
   fileName: string;
 }
 
-export function FileManager({ files, topics, onFileDelete, onFileMove, onTopicDelete }: FileManagerProps) {
+export function FileManager({ files, topics, onFileDelete, onFileMove, onTopicDelete, frameless }: FileManagerProps) {
   const [draggedFile, setDraggedFile] = useState<DragData | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'file' | 'topic'; id: string } | null>(null);
 
@@ -75,7 +76,7 @@ export function FileManager({ files, topics, onFileDelete, onFileMove, onTopicDe
   };
 
   return (
-    <div className="glass-card rounded-2xl p-6">
+    <div className={frameless ? '' : 'glass-card rounded-2xl p-6'}>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-glass flex items-center">
           <FileText className="mr-3 text-white/80" size={24} />

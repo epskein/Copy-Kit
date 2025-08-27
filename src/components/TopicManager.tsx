@@ -8,9 +8,10 @@ interface TopicManagerProps {
   onTopicCreated: (topic: Topic) => void;
   onTopicSelected: (topic: Topic | null) => void;
   onTopicDelete: (topicId: string) => void;
+  frameless?: boolean;
 }
 
-export function TopicManager({ topics, selectedTopic, onTopicCreated, onTopicSelected, onTopicDelete }: TopicManagerProps) {
+export function TopicManager({ topics, selectedTopic, onTopicCreated, onTopicSelected, onTopicDelete, frameless }: TopicManagerProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [newTopicName, setNewTopicName] = useState('');
   const [newTopicDescription, setNewTopicDescription] = useState('');
@@ -44,7 +45,7 @@ export function TopicManager({ topics, selectedTopic, onTopicCreated, onTopicSel
   };
 
   return (
-    <div className="glass-card rounded-2xl p-6">
+    <div className={frameless ? '' : 'glass-card rounded-2xl p-6'}>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-glass flex items-center">
           <Folder className="mr-3 text-white/80" size={24} />

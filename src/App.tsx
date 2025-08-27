@@ -136,30 +136,37 @@ function App() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - File Upload & Topic Management */}
-          <div className="lg:col-span-1 space-y-6">
-            <TopicManager
-              topics={topics}
-              selectedTopic={selectedTopic}
-              onTopicCreated={handleTopicCreated}
-              onTopicSelected={handleTopicSelected}
-              onTopicDelete={handleTopicDelete}
-            />
-            
-            <FileUpload
-              onFilesUploaded={handleFilesUploaded}
-              selectedTopic={selectedTopic}
-              isAnalyzing={isAnalyzing}
-            />
+        {/* File Upload - Full width top section */}
+        <div className="mb-6">
+          <FileUpload
+            onFilesUploaded={handleFilesUploaded}
+            selectedTopic={selectedTopic}
+            isAnalyzing={isAnalyzing}
+          />
+        </div>
 
-            <FileManager
-              files={files}
-              topics={topics}
-              onFileDelete={handleFileDelete}
-              onFileMove={handleFileMove}
-              onTopicDelete={handleTopicDelete}
-            />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - One shared card wrapping Topics and File Manager */}
+          <div className="lg:col-span-1">
+            <div className="glass-card rounded-2xl p-6 space-y-6">
+              <TopicManager
+                topics={topics}
+                selectedTopic={selectedTopic}
+                onTopicCreated={handleTopicCreated}
+                onTopicSelected={handleTopicSelected}
+                onTopicDelete={handleTopicDelete}
+                frameless
+              />
+
+              <FileManager
+                files={files}
+                topics={topics}
+                onFileDelete={handleFileDelete}
+                onFileMove={handleFileMove}
+                onTopicDelete={handleTopicDelete}
+                frameless
+              />
+            </div>
           </div>
 
           {/* Right Column - Analysis Results */}

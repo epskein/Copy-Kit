@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 
 // Import all background images
 const backgroundImages = [
-  '/bg_images/pexels-billelmoula-540518.jpg',
-  '/bg_images/pexels-joyston-judah-331625-933054.jpg'
+  '/bg_images/bg_img_1.jpg',
+  '/bg_images/bg_img_2.jpg',
+  '/bg_images/bg_img_3.jpg',
+  '/bg_images/bg_img_4.jpg'
 ];
 
 export const useBackgroundCycler = () => {
