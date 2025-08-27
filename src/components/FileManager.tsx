@@ -6,7 +6,7 @@ interface FileManagerProps {
   files: FileData[];
   topics: Topic[];
   onFileDelete: (fileId: string) => void;
-  onFileMove: (fileId: string, newTopic: string | undefined) => void;
+  onAddFileToTopic: (fileId: string, topicName: string) => void;
   onTopicDelete: (topicId: string) => void;
   frameless?: boolean;
 }
@@ -16,19 +16,13 @@ interface DragData {
   fileName: string;
 }
 
-export function FileManager({ files, topics, onFileDelete, onFileMove, onTopicDelete, frameless }: FileManagerProps) {
+export function FileManager({ files, topics, onFileDelete, onAddFileToTopic, onTopicDelete, frameless }: FileManagerProps) {
   const [draggedFile, setDraggedFile] = useState<DragData | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'file' | 'topic'; id: string } | null>(null);
 
-  // Group files by topic
-  const filesByTopic = files.reduce((acc, file) => {
-    const topicName = file.topic || 'Unassigned';
-    if (!acc[topicName]) {
-      acc[topicName] = [];
-    }
-    acc[topicName].push(file);
-    return acc;
-  }, {} as Record<string, FileData[]>);
+  // Helper to get files for a given topic
+  const filesForTopic = (topicName: string) =>
+    files.filter(f => (f.topics || []).includes(topicName));
 
   const handleDragStart = (e: React.DragEvent, file: FileData) => {
     const dragData: DragData = { fileId: file.id, fileName: file.name };
@@ -46,14 +40,14 @@ export function FileManager({ files, topics, onFileDelete, onFileMove, onTopicDe
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (e: React.DragEvent, targetTopic: string | undefined) => {
+  const handleDrop = (e: React.DragEvent, targetTopic: string) => {
     e.preventDefault();
     try {
       const dragData: DragData = JSON.parse(e.dataTransfer.getData('application/json'));
       if (dragData.fileId && draggedFile) {
         const file = files.find(f => f.id === dragData.fileId);
-        if (file && file.topic !== targetTopic) {
-          onFileMove(dragData.fileId, targetTopic);
+        if (file && !(file.topics || []).includes(targetTopic)) {
+          onAddFileToTopic(dragData.fileId, targetTopic);
         }
       }
     } catch (error) {
@@ -72,7 +66,7 @@ export function FileManager({ files, topics, onFileDelete, onFileMove, onTopicDe
   };
 
   const getTopicFileCount = (topicName: string) => {
-    return files.filter(file => file.topic === topicName).length;
+    return filesForTopic(topicName).length;
   };
 
   return (
@@ -88,61 +82,58 @@ export function FileManager({ files, topics, onFileDelete, onFileMove, onTopicDe
       </div>
 
       <div className="space-y-6">
-        {/* Unassigned Files */}
-        {filesByTopic['Unassigned'] && (
-          <div
-            className={`border-2 border-dashed rounded-xl p-4 transition-all ${
-              draggedFile ? 'border-white/50 bg-white/10' : 'border-white/20'
-            }`}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, undefined)}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <FolderOpen className="mr-2 text-white/60" size={18} />
-                <span className="font-medium text-glass">Unassigned Files</span>
-                <span className="ml-2 text-xs bg-white/20 text-white px-2 py-1 rounded-full">
-                  {filesByTopic['Unassigned'].length}
-                </span>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              {filesByTopic['Unassigned'].map((file) => (
-                <div
-                  key={file.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, file)}
-                  onDragEnd={handleDragEnd}
-                  className={`flex items-center justify-between p-3 glass-input rounded-lg cursor-move transition-all hover:bg-white/20 ${
-                    draggedFile?.fileId === file.id ? 'opacity-50' : ''
-                  }`}
-                >
-                  <div className="flex items-center min-w-0 flex-1">
-                    <FileText className="mr-3 text-white/60 flex-shrink-0" size={16} />
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm text-glass truncate">{file.name}</div>
-                      <div className="text-xs text-glass-light">
-                        Uploaded {file.uploadedAt.toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setDeleteConfirm({ type: 'file', id: file.id })}
-                    className="ml-3 p-1 text-red-400 hover:text-red-300 hover:bg-red-400/20 rounded transition-all flex-shrink-0"
-                    title="Delete file"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ))}
+        {/* All Files (previously Unassigned) */}
+        <div
+          className={`border-2 border-dashed rounded-xl p-4 transition-all ${
+            draggedFile ? 'border-white/50 bg-white/10' : 'border-white/20'
+          }`}
+          onDragOver={handleDragOver}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <FolderOpen className="mr-2 text-white/60" size={18} />
+              <span className="font-medium text-glass">All Files</span>
+              <span className="ml-2 text-xs bg-white/20 text-white px-2 py-1 rounded-full">
+                {files.length}
+              </span>
             </div>
           </div>
-        )}
+
+          <div className="space-y-2">
+            {files.map((file) => (
+              <div
+                key={file.id}
+                draggable
+                onDragStart={(e) => handleDragStart(e, file)}
+                onDragEnd={handleDragEnd}
+                className={`flex items-center justify-between p-3 glass-input rounded-lg cursor-move transition-all hover:bg-white/20 ${
+                  draggedFile?.fileId === file.id ? 'opacity-50' : ''
+                }`}
+              >
+                <div className="flex items-center min-w-0 flex-1">
+                  <FileText className="mr-3 text-white/60 flex-shrink-0" size={16} />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm text-glass truncate">{file.name}</div>
+                    <div className="text-xs text-glass-light">
+                      Uploaded {file.uploadedAt.toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setDeleteConfirm({ type: 'file', id: file.id })}
+                  className="ml-3 p-1 text-red-400 hover:text-red-300 hover:bg-red-400/20 rounded transition-all flex-shrink-0"
+                  title="Delete file"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Topic Folders */}
         {topics.map((topic) => {
-          const topicFiles = filesByTopic[topic.name] || [];
+          const topicFiles = filesForTopic(topic.name);
           return (
             <div
               key={topic.id}
@@ -175,7 +166,7 @@ export function FileManager({ files, topics, onFileDelete, onFileMove, onTopicDe
 
               {topicFiles.length === 0 ? (
                 <div className="text-center py-4 text-glass-muted text-sm">
-                  Drop files here to assign to this topic
+                  Drop files here to add to this topic
                 </div>
               ) : (
                 <div className="space-y-2">

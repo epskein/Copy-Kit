@@ -22,7 +22,7 @@ function App() {
       const filesWithTopic = newFiles.map(file => ({
         ...file,
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        topic: selectedTopic?.name,
+        topics: [],
         uploadedAt: new Date()
       }));
 
@@ -78,13 +78,14 @@ function App() {
     }
   };
 
-  const handleFileMove = (fileId: string, newTopic: string | undefined) => {
-    setFiles(prevFiles => 
-      prevFiles.map(file => 
-        file.id === fileId 
-          ? { ...file, topic: newTopic }
-          : file
-      )
+  const handleAddFileToTopic = (fileId: string, topicName: string) => {
+    setFiles(prevFiles =>
+      prevFiles.map(file => {
+        if (file.id !== fileId) return file;
+        const existingTopics = file.topics || [];
+        if (existingTopics.includes(topicName)) return file;
+        return { ...file, topics: [...existingTopics, topicName] };
+      })
     );
   };
 
@@ -92,15 +93,15 @@ function App() {
     // Remove topic from topics list
     setTopics(prevTopics => prevTopics.filter(topic => topic.id !== topicId));
     
-    // Find the topic name to unassign files
+    // Remove the topic from any file's topic list
     const topicToDelete = topics.find(topic => topic.id === topicId);
     if (topicToDelete) {
-      setFiles(prevFiles => 
-        prevFiles.map(file => 
-          file.topic === topicToDelete.name 
-            ? { ...file, topic: undefined }
-            : file
-        )
+      setFiles(prevFiles =>
+        prevFiles.map(file => {
+          const currentTopics = file.topics || [];
+          if (!currentTopics.includes(topicToDelete.name)) return file;
+          return { ...file, topics: currentTopics.filter(t => t !== topicToDelete.name) };
+        })
       );
     }
     
@@ -140,7 +141,6 @@ function App() {
         <div className="mb-6">
           <FileUpload
             onFilesUploaded={handleFilesUploaded}
-            selectedTopic={selectedTopic}
             isAnalyzing={isAnalyzing}
           />
         </div>
@@ -162,7 +162,7 @@ function App() {
                 files={files}
                 topics={topics}
                 onFileDelete={handleFileDelete}
-                onFileMove={handleFileMove}
+                onAddFileToTopic={handleAddFileToTopic}
                 onTopicDelete={handleTopicDelete}
                 frameless
               />

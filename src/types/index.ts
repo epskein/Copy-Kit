@@ -2,7 +2,7 @@ export interface FileData {
   id: string;
   name: string;
   content: string;
-  topic?: string;
+  topics?: string[];
   uploadedAt: Date;
 }
 

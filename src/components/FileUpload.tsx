@@ -1,14 +1,13 @@
 import React, { useCallback } from 'react';
 import { Upload, FileText, Loader2 } from 'lucide-react';
-import type { FileData, Topic } from '../types';
+import type { FileData } from '../types';
 
 interface FileUploadProps {
   onFilesUploaded: (files: FileData[]) => void;
-  selectedTopic: Topic | null;
   isAnalyzing: boolean;
 }
 
-export function FileUpload({ onFilesUploaded, selectedTopic, isAnalyzing }: FileUploadProps) {
+export function FileUpload({ onFilesUploaded, isAnalyzing }: FileUploadProps) {
   const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files) return;
@@ -22,7 +21,7 @@ export function FileUpload({ onFilesUploaded, selectedTopic, isAnalyzing }: File
             id: '', // Will be set in App.tsx
             name: file.name,
             content: content,
-            topic: selectedTopic?.name,
+            topics: [],
             uploadedAt: new Date()
           });
         };
@@ -40,7 +39,7 @@ export function FileUpload({ onFilesUploaded, selectedTopic, isAnalyzing }: File
       .catch(error => {
         console.error('Error reading files:', error);
       });
-  }, [onFilesUploaded, selectedTopic]);
+  }, [onFilesUploaded]);
 
   const handleDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -59,7 +58,7 @@ export function FileUpload({ onFilesUploaded, selectedTopic, isAnalyzing }: File
             id: '', // Will be set in App.tsx
             name: file.name,
             content: content,
-            topic: selectedTopic?.name,
+            topics: [],
             uploadedAt: new Date()
           });
         };
@@ -75,7 +74,7 @@ export function FileUpload({ onFilesUploaded, selectedTopic, isAnalyzing }: File
       .catch(error => {
         console.error('Error reading files:', error);
       });
-  }, [onFilesUploaded, selectedTopic]);
+  }, [onFilesUploaded]);
 
   return (
     <div className="glass-card rounded-2xl p-6">
@@ -126,13 +125,7 @@ export function FileUpload({ onFilesUploaded, selectedTopic, isAnalyzing }: File
         </label>
       </div>
 
-      {selectedTopic && (
-        <div className="mt-6 glass-input rounded-xl p-4">
-          <p className="text-sm text-glass">
-            📂 Files will be assigned to topic: <strong className="text-white">{selectedTopic.name}</strong>
-          </p>
-        </div>
-      )}
+      {/* No automatic topic assignment notice; files start in All Files */}
     </div>
   );
 }
