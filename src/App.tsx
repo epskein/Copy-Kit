@@ -3,6 +3,7 @@ import { FileUpload } from './components/FileUpload';
 import { PatternDisplay } from './components/PatternDisplay';
 import { TopicManager } from './components/TopicManager';
 import { FileManager } from './components/FileManager';
+import { BackgroundCycler } from './components/BackgroundCycler';
 import { PatternAnalyzer } from './lib/pattern-analyzer';
 import type { FileData, Topic, ExtractedPattern } from './types';
 import './App.css';
@@ -111,6 +112,9 @@ function App() {
 
   return (
     <div className="min-h-screen relative">
+      {/* Background Image Cycler */}
+      <BackgroundCycler />
+      
       {/* Floating background shapes */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="floating-shape absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full blur-sm"></div>
